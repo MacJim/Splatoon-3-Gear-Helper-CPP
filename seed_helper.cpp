@@ -10,6 +10,13 @@
 #include "data/brands.h"
 
 
+struct Weight {
+    static constexpr int UNLIKELY = 1;
+    static constexpr int NEUTRAL = 2;
+    static constexpr int LIKELY = 10;
+};
+
+
 SeedHelper::SeedHelper(std::string_view brandName) {
     this->brandName = brandName;
 
@@ -68,6 +75,44 @@ uint32_t SeedHelper::advanceSeed(uint32_t seed) {
     seed ^= (seed >> 17);
     seed ^= (seed << 5);
     return seed;
+}
+
+std::string_view SeedHelper::getBrandedAbility(uint32_t seed) {
+    assert(!brandName.empty());
+    assert(totalWeight > 0);
+    assert(!cachedWeightsMap.empty());
+
+    const auto randomNumber = seed % totalWeight;
+    return cachedWeightsMap[randomNumber];
+}
+
+std::pair<std::string_view, uint32_t> SeedHelper::generateRoll(uint32_t seed) {
+    seed = advanceSeed(seed);
+    const auto ability = getBrandedAbility(seed);
+    return std::make_pair(ability, seed);
+}
+
+std::vector<uint32_t> SeedHelper::findSeed(const std::vector<std::string_view> &previousRolls) {
+    auto returnValue = std::vector<uint32_t>();
+
+    uint32_t initial_seed = 0;
+    while (initial_seed++ != UINT32_MAX) {  // I hate `++`, but for an unsigned int this seems to be the best solution.
+        auto seed = initial_seed;
+        auto valid = true;
+        for (size_t i = 0; i < previousRolls.size(); i += 1) {
+            const auto result = generateRoll(seed);
+            if ((result.first != previousRolls[i]) && (result.first != placeholderAbility)) {
+                valid = false;
+                break;
+            }
+        }
+
+        if (valid) {
+            returnValue.push_back(initial_seed);
+        }
+    }
+
+    return returnValue;
 }
 
 

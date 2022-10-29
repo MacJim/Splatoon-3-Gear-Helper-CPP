@@ -20,13 +20,6 @@ public:
     std::string_view brandName;
 
 private:
-    struct Weight {
-        static constexpr int UNLIKELY = 1;
-        static constexpr int NEUTRAL = 2;
-        static constexpr int LIKELY = 10;
-    };
-
-private:
     /// Roll mod.
     uint32_t totalWeight;
     /**
@@ -36,13 +29,19 @@ private:
     std::vector<std::string_view> cachedWeightsMap;
 
 #pragma mark Seed
-public:
-    static uint32_t advanceSeed(uint32_t seed);
+private:
+    uint32_t advanceSeed(uint32_t seed);
 
 #pragma mark Roll abilities
+private:
+    std::string_view getBrandedAbility(uint32_t seed);
+
 public:
-    std::string_view getBrandedAbility(uint32_t seed, std::string_view brandName);
-    inline std::pair<std::string_view, uint32_t> generateRoll(uint32_t seed, std::string_view brandName);
+    /**
+     * Roll once and generate the next ability.
+     * @return (next ability, next seed)
+     */
+    inline std::pair<std::string_view, uint32_t> generateRoll(uint32_t seed);
 
 #pragma mark Find seed
 public:
