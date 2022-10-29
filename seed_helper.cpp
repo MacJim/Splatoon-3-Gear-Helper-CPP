@@ -64,7 +64,10 @@ SeedHelper::SeedHelper(std::string_view brandName) {
 }
 
 uint32_t SeedHelper::advanceSeed(uint32_t seed) {
-    return 0;
+    seed ^= (seed << 13);
+    seed ^= (seed >> 17);
+    seed ^= (seed << 5);
+    return seed;
 }
 
 
