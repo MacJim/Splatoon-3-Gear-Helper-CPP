@@ -29,11 +29,11 @@ private:
     std::vector<std::string_view> cachedWeightsMap;
 
 #pragma mark Seed
-private:
-    uint32_t advanceSeed(uint32_t seed);
+public:
+    static uint32_t advanceSeed(uint32_t seed);
 
 #pragma mark Roll abilities
-private:
+public:
     std::string_view getBrandedAbility(uint32_t seed);
 
 public:
