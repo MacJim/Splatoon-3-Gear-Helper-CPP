@@ -1,5 +1,6 @@
 #include <array>
 #include <unordered_map>
+#include <set>
 
 #include "gtest/gtest.h"
 
@@ -163,3 +164,67 @@ TEST(SeedHelperTest, GenerateRollBiasedBrands) {
 
 
 #pragma mark findSeed
+TEST(SeedHelperTest, FindSeedNeutralBrands) {
+    GTEST_SKIP() << "Too time consuming. Only test upon major modifications.";
+
+    /// (expected results/initial seed, rolled abilities)
+    const std::vector<std::pair<std::vector<uint32_t>, std::vector<std::string_view>>> testCases = {
+        std::make_pair(
+            std::vector<uint32_t>({0x87a4b37e}),
+            std::vector<std::string_view>({"run_speed_up", "special_charge_up", "special_charge_up", "sub_power_up", "run_speed_up", "special_saver", "special_charge_up", "intensify_action", "special_charge_up", "special_saver", "special_charge_up", "special_saver", "swim_speed_up", "special_saver", "special_saver"})
+        ),
+        std::make_pair(
+            std::vector<uint32_t>({0x3b09c31b, 0xb32ef1ef, 0xd929930b, 0xea2db1fe}),
+            std::vector<std::string_view>({"ink_saver_sub", "ink_resistance_up", "special_power_up", "ink_saver_sub", "ink_recovery_up", "sub_power_up", "run_speed_up", "special_power_up"})
+        ),
+        std::make_pair(
+            std::vector<uint32_t>({0x6190ed, 0x9778b27, 0xad66e54, 0xe4d3afa, 0x12e71833, 0x14054d6b, 0x17e85407, 0x1bbfa76e, 0x1c20f670, 0x22b76a45, 0x26ccf63f, 0x2931987c, 0x2ac8b6c2, 0x2b45e545, 0x2c3341f1, 0x2cbff1ff, 0x38bd30f2, 0x42e9f7fd, 0x498958ec, 0x51de83ff, 0x766cd6ba, 0x78cf83f3, 0x89ed9033, 0x8b687e8f, 0x8c465ea7, 0x8dba02ed, 0x91238fad, 0x94fe7fd0, 0xa268c374, 0xa3440b6b, 0xaa358c67, 0xad1ad783, 0xb21c2cff, 0xbc9ba1e5, 0xd4a5f808, 0xda744104, 0xe425c810, 0xeecadc56, 0xefabfaa1, 0xf452fc06, 0xf63dcb84}),
+            std::vector<std::string_view>({"ink_saver_sub", "quick_respawn", "ink_recovery_up", "ink_saver_main", "special_charge_up", "special_power_up", "special_saver"})
+        ),
+    };
+
+    for (auto& brandName: neutralBrands) {
+        auto seedHelper = SeedHelper(brandName);
+        for (auto& [expectedResults, rolledAbilities]: testCases) {
+            const auto results = seedHelper.findSeed(rolledAbilities);
+            EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", 0x" << std::hex << ::testing::PrintToString(expectedResults) << ")";
+
+            const auto resultsSet = std::set<uint32_t>(results.begin(), results.end());
+            const auto expectedResultsSet = std::set<uint32_t>(expectedResults.begin(), expectedResults.end());
+            EXPECT_EQ(resultsSet, expectedResultsSet) << "Test case: (" << brandName << ", " << std::hex << ::testing::PrintToString(expectedResults) << ")";
+        }
+    }
+}
+
+
+TEST(SeedHelperTest, FindSeedBiasedBrands) {
+    /// (brand name, expected results/initial seed, rolled abilities)
+    const std::vector<std::tuple<std::string_view, std::vector<uint32_t>, std::vector<std::string_view>>> testCases = {
+        std::make_tuple(
+            "Zekko",
+            std::vector<uint32_t>({0x87b091}),
+            std::vector<std::string_view>({"sub_resistance_up", "special_saver", "quick_super_jump", "swim_speed_up", "special_power_up", "quick_respawn", "quick_super_jump", "ink_saver_main", "ink_saver_sub", "ink_saver_sub"})
+        ),
+        std::make_tuple(
+            "Firefin",
+            std::vector<uint32_t>({0x2ff2311e, 0x5cf03863, 0x809b1a97}),
+            std::vector<std::string_view>({"ink_saver_sub", "quick_respawn", "sub_resistance_up", "swim_speed_up", "ink_resistance_up", "quick_respawn", "ink_saver_main", "swim_speed_up"})
+        ),
+        std::make_tuple(
+            "Splash Mob",
+            std::vector<uint32_t>({0x7843744, 0x1b701a85, 0x21c98a86, 0x351c815a, 0x3810b1d3, 0x3cc89170, 0x58c56bc9, 0x91882513, 0x9ba02391, 0xa55de1c5, 0xbea8715e, 0xbf274b0d, 0xf6249c6c}),
+            std::vector<std::string_view>({"swim_speed_up", "ink_saver_sub", "quick_super_jump", "ink_saver_main", "ink_saver_main", "sub_resistance_up", "ink_saver_main", "sub_power_up", "ink_saver_main"})
+        ),
+    };
+
+    for (auto& [brandName, expectedResults, rolledAbilities]: testCases) {
+        auto seedHelper = SeedHelper(brandName);
+
+        const auto results = seedHelper.findSeed(rolledAbilities);
+        EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", 0x" << std::hex << ::testing::PrintToString(expectedResults) << ")";
+
+        const auto resultsSet = std::set<uint32_t>(results.begin(), results.end());
+        const auto expectedResultsSet = std::set<uint32_t>(expectedResults.begin(), expectedResults.end());
+        EXPECT_EQ(resultsSet, expectedResultsSet) << "Test case: (" << brandName << ", " << std::hex << ::testing::PrintToString(expectedResults) << ")";
+    }
+}
