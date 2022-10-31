@@ -86,10 +86,10 @@ std::string_view SeedHelper::getBrandedAbility(uint32_t seed) {
     return cachedWeightsMap[randomNumber];
 }
 
-std::pair<std::string_view, uint32_t> SeedHelper::generateRoll(uint32_t seed) {
+std::pair<uint32_t, std::string_view> SeedHelper::generateRoll(uint32_t seed) {
     seed = advanceSeed(seed);
     const auto ability = getBrandedAbility(seed);
-    return std::make_pair(ability, seed);
+    return std::make_pair(seed, ability);
 }
 
 std::vector<uint32_t> SeedHelper::findSeed(const std::vector<std::string_view> &previousRolls) {
@@ -101,7 +101,7 @@ std::vector<uint32_t> SeedHelper::findSeed(const std::vector<std::string_view> &
         auto valid = true;
         for (size_t i = 0; i < previousRolls.size(); i += 1) {
             const auto result = generateRoll(seed);
-            if ((result.first != previousRolls[i]) && (result.first != placeholderAbility)) {
+            if ((result.second != previousRolls[i]) && (result.second != placeholderAbility)) {
                 valid = false;
                 break;
             }

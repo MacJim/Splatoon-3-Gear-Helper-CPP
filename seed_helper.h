@@ -39,9 +39,9 @@ public:
 public:
     /**
      * Roll once and generate the next ability.
-     * @return (next ability, next seed)
+     * @return (next seed, next ability)
      */
-    inline std::pair<std::string_view, uint32_t> generateRoll(uint32_t seed);
+    inline std::pair<uint32_t, std::string_view> generateRoll(uint32_t seed);
 
 #pragma mark Find seed
 public:

@@ -83,17 +83,17 @@ TEST(SeedHelperTest, GetBrandedAbilityBiasedBrands) {
            std::make_pair(0x8b3644cf, "intensify_action"),
            std::make_pair(0x4eab4f2f, "sub_power_up"),
            std::make_pair(0x39d2b193, "quick_respawn"),
-       }},
+        }},
         {"Emberz", {
            std::make_pair(0x4111a2fd, "intensify_action"),
            std::make_pair(0x94edd48f, "special_charge_up"),
            std::make_pair(0xff675892, "run_speed_up"),
-       }},
+        }},
         {"Enperry", {
            std::make_pair(0xe90c15d3, "sub_power_up"),
            std::make_pair(0xf6bd5e1f, "ink_resistance_up"),
            std::make_pair(0x5a77d10, "swim_speed_up"),
-       }},
+        }},
     };
 
     for (auto& [brandName, brandTestCases]: testCases) {
@@ -107,3 +107,59 @@ TEST(SeedHelperTest, GetBrandedAbilityBiasedBrands) {
 
 
 #pragma mark generateRoll
+TEST(SeedHelperTest, GenerateRollNeutralBrands) {
+    constexpr uint32_t initialSeed = 0x81207561;
+    constexpr std::array<std::pair<uint32_t, std::string_view>, 7> expectedResults = {
+        std::make_pair(0x7e0e4647, "special_power_up"),
+        std::make_pair(0x6e1959a4, "swim_speed_up"),
+        std::make_pair(0xe0929d72, "intensify_action"),
+        std::make_pair(0xd4ac196c, "swim_speed_up"),
+        std::make_pair(0xa7b7e72c, "sub_resistance_up"),
+        std::make_pair(0x311b1a25, "special_saver"),
+        std::make_pair(0x19adf24a, "run_speed_up"),
+    };
+
+    for (auto& brandName: neutralBrands) {
+        auto seedHelper = SeedHelper(brandName);
+
+        uint32_t seed = initialSeed;
+        for (auto& [expectedSeed, expectedAbility]: expectedResults) {
+            const auto& result = seedHelper.generateRoll(seed);
+            seed = result.first;
+            EXPECT_EQ(seed, expectedSeed) << "Test case: (" << brandName << ", 0x" << std::hex << initialSeed << ")";
+            EXPECT_EQ(result.second, expectedAbility) << "Test case: (" << brandName << ", 0x" << std::hex << initialSeed << ")";
+        }
+    }
+}
+
+
+TEST(SeedHelperTest, GenerateRollBiasedBrands) {
+    /**
+     * {brand name: (seed, expected next seed, expected result)}
+     * Order: Likely, unlikely, neutral
+     */
+    const std::unordered_map<std::string_view, std::array<std::tuple<uint32_t, uint32_t, std::string_view>, 3>> testCases = {
+        {"Krak-On", {
+            std::make_tuple(0xa5b4a2ae, 0xdce319e, "swim_speed_up"),
+            std::make_tuple(0x14415c0a, 0xc7c07eaa, "sub_resistance_up"),
+            std::make_tuple(0x581853e9, 0x1ece01bb, "quick_respawn"),
+        }},
+        {"Splash Mob", {
+            std::make_tuple(0x10b8c0fe, 0x1c47910d, "ink_saver_main"),
+            std::make_tuple(0x236779ee, 0x470127a3, "run_speed_up"),
+            std::make_tuple(0x850f3db7, 0x3584718b, "ink_recovery_up"),
+        }},
+    };
+
+    for (auto& [brandName, brandTestCases]: testCases) {
+        auto seedHelper = SeedHelper(brandName);
+        for (auto& [seed, expectedNextSeed, expectedAbility]: brandTestCases) {
+            const auto& result = seedHelper.generateRoll(seed);
+            EXPECT_EQ(result.first, expectedNextSeed) << "Test case: (" << brandName << ", 0x" << std::hex << seed << ")";
+            EXPECT_EQ(result.second, expectedAbility) << "Test case: (" << brandName << ", 0x" << std::hex << seed << ")";
+        }
+    }
+}
+
+
+#pragma mark findSeed
