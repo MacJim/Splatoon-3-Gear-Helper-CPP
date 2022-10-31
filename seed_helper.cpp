@@ -101,6 +101,7 @@ std::vector<uint32_t> SeedHelper::findSeed(const std::vector<std::string_view> &
         auto valid = true;
         for (size_t i = 0; i < previousRolls.size(); i += 1) {
             const auto result = generateRoll(seed);
+            seed = result.first;
             if ((result.second != previousRolls[i]) && (result.second != placeholderAbility)) {
                 valid = false;
                 break;
