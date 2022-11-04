@@ -27,6 +27,9 @@ constexpr std::array<std::string_view, 14> abilities = {
     "intensify_action",
 };
 
+/// Get ability index in `abilities`.
+size_t getAbilityIndex(const std::string_view& ability);
+
 constexpr std::string_view placeholderAbility = "unknown";
 
 //const std::unordered_map<std::string_view, std::string_view> ABILITIES = {
