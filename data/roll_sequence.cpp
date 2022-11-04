@@ -13,7 +13,7 @@ RollSequence::RollSequence(const std::vector<std::string_view> &rolls): data{} {
     }
 }
 
-std::unordered_set<std::string_view> RollSequence::getDrinksUsed() {
+std::unordered_set<std::string_view> RollSequence::getDrinksUsed() const {
      std::unordered_set<std::string_view> returnValue{};
      for (const auto& [roll, drink]: data) {
          if (!drink.empty()) {

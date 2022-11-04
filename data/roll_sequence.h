@@ -21,13 +21,19 @@ public:
     inline DataType::iterator begin() {
         return data.begin();
     }
+    inline DataType::const_iterator begin() const {
+        return data.begin();
+    }
     inline DataType::iterator end() {
         return data.end();
     }
-    inline DataType::size_type size() {
+    inline DataType::const_iterator end() const {
+        return data.end();
+    }
+    inline DataType::size_type size() const {
         return data.size();
     }
-    inline bool empty() {
+    inline bool empty() const {
         return data.empty();
     }
 
@@ -56,7 +62,7 @@ public:
      *
      * Used to calculate/cache the "weights map" for each type of drink.
      */
-    std::unordered_set<std::string_view> getDrinksUsed();
+    [[nodiscard]] std::unordered_set<std::string_view> getDrinksUsed() const;
 };
 
 
