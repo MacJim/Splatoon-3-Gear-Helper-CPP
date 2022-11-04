@@ -17,9 +17,7 @@ struct Weight {
 };
 
 
-SeedHelper::SeedHelper(std::string_view brandName) {
-    this->brandName = brandName;
-
+SeedHelper::SeedHelper(std::string_view brandName): brandName(brandName) {
     // Cache weights.
     /**
      * Each ability's weight.

@@ -13,7 +13,7 @@
 class SeedHelper {
 #pragma mark Constructor
 public:
-    SeedHelper(std::string_view brandName);
+    explicit SeedHelper(std::string_view brandName);
 
 #pragma mark Brand weight
 public:
