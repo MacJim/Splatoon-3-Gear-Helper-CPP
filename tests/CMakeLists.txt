@@ -10,7 +10,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(seed_helper_test seed_helper_test.cpp ../seed_helper.cpp ../data/abilities.cpp)
+add_executable(seed_helper_test seed_helper_test.cpp ../seed_helper.cpp ../data/abilities.cpp ../data/roll_sequence.cpp)
 target_link_libraries(seed_helper_test GTest::gtest_main)
 
 add_executable(roll_sequence_test roll_sequence_test.cpp ../data/roll_sequence.cpp)

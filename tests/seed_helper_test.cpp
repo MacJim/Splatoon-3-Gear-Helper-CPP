@@ -5,7 +5,6 @@
 #include "gtest/gtest.h"
 
 #include "../seed_helper.h"
-#include "../data/abilities.h"
 #include "../data/brands.h"
 
 
@@ -107,6 +106,10 @@ TEST(SeedHelperTest, GetBrandedAbilityBiasedBrands) {
 }
 
 
+#pragma mark getBrandedAbilityWithDrink
+// TODO:
+
+
 #pragma mark generateRoll
 TEST(SeedHelperTest, GenerateRollNeutralBrands) {
     constexpr uint32_t initialSeed = 0x81207561;
@@ -163,10 +166,12 @@ TEST(SeedHelperTest, GenerateRollBiasedBrands) {
 }
 
 
-#pragma mark findSeed
-TEST(SeedHelperTest, FindSeedNeutralBrands) {
-    GTEST_SKIP() << "Too time consuming. Only test upon major modifications.";
+#pragma mark generateRollWithDrink
+// TODO:
 
+
+#pragma mark findSeed, no drink
+TEST(SeedHelperTest, FindSeedNeutralBrandsNoDrink) {
     /// (expected results/initial seed, rolled abilities)
     const std::vector<std::pair<std::vector<uint32_t>, std::vector<std::string_view>>> testCases = {
         std::make_pair(
@@ -186,7 +191,8 @@ TEST(SeedHelperTest, FindSeedNeutralBrands) {
     for (auto& brandName: neutralBrands) {
         auto seedHelper = SeedHelper(brandName);
         for (auto& [expectedResults, rolledAbilities]: testCases) {
-            const auto results = seedHelper.findSeed(rolledAbilities);
+            const RollSequence rollSequence{rolledAbilities};
+            const auto results = seedHelper.findSeed(rollSequence);
             EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", 0x" << std::hex << ::testing::PrintToString(expectedResults) << ")";
 
             const auto resultsSet = std::set<uint32_t>(results.begin(), results.end());
@@ -197,7 +203,7 @@ TEST(SeedHelperTest, FindSeedNeutralBrands) {
 }
 
 
-TEST(SeedHelperTest, FindSeedBiasedBrands) {
+TEST(SeedHelperTest, FindSeedBiasedBrandsNoDrink) {
     /// (brand name, expected results/initial seed, rolled abilities)
     const std::vector<std::tuple<std::string_view, std::vector<uint32_t>, std::vector<std::string_view>>> testCases = {
         std::make_tuple(
@@ -218,9 +224,10 @@ TEST(SeedHelperTest, FindSeedBiasedBrands) {
     };
 
     for (auto& [brandName, expectedResults, rolledAbilities]: testCases) {
+        const RollSequence rollSequence{rolledAbilities};
         auto seedHelper = SeedHelper(brandName);
 
-        const auto results = seedHelper.findSeed(rolledAbilities);
+        const auto results = seedHelper.findSeed(rollSequence);
         EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", 0x" << std::hex << ::testing::PrintToString(expectedResults) << ")";
 
         const auto resultsSet = std::set<uint32_t>(results.begin(), results.end());
@@ -228,3 +235,7 @@ TEST(SeedHelperTest, FindSeedBiasedBrands) {
         EXPECT_EQ(resultsSet, expectedResultsSet) << "Test case: (" << brandName << ", " << std::hex << ::testing::PrintToString(expectedResults) << ")";
     }
 }
+
+
+#pragma mark findSeed, with drink
+// TODO:
