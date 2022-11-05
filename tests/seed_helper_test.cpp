@@ -106,10 +106,6 @@ TEST(SeedHelperTest, GetBrandedAbilityBiasedBrands) {
 }
 
 
-#pragma mark getBrandedAbilityWithDrink
-// TODO:
-
-
 #pragma mark generateRoll
 TEST(SeedHelperTest, GenerateRollNeutralBrands) {
     constexpr uint32_t initialSeed = 0x81207561;
@@ -167,7 +163,93 @@ TEST(SeedHelperTest, GenerateRollBiasedBrands) {
 
 
 #pragma mark generateRollWithDrink
-// TODO:
+TEST(SeedHelperTest, GenerateRollWithDrinkNeutralBrands) {
+    constexpr uint32_t initialSeed = 0x79239fed;
+    constexpr std::string_view drink = "run_speed_up";
+    /// (expected seed, expected result)
+    constexpr std::array<std::pair<uint32_t, std::string_view>, 10> expectedResults = {
+        std::make_pair(0x51196ac2, "run_speed_up"),
+        std::make_pair(0x2b86c939, "sub_resistance_up"),
+        std::make_pair(0xa6939d49, "run_speed_up"),
+        std::make_pair(0x8e984091, "sub_power_up"),
+        std::make_pair(0x7673e6, "ink_resistance_up"),
+        std::make_pair(0xce455fc3, "swim_speed_up"),
+        std::make_pair(0xd21caebd, "run_speed_up"),
+        std::make_pair(0xa2d39c2a, "sub_power_up"),
+        std::make_pair(0xfb8024a1, "run_speed_up"),
+        std::make_pair(0xb41a6d22, "special_power_up"),
+    };
+
+    for (auto& brandName: neutralBrands) {
+        auto seedHelper = SeedHelper(brandName);
+        seedHelper.cacheAllDrinkWeightsMaps();
+
+        uint32_t seed = initialSeed;
+        for (auto& [expectedSeed, expectedAbility]: expectedResults) {
+            const auto& result = seedHelper.generateRollWithDrink(seed, drink);
+            seed = result.first;
+            EXPECT_EQ(seed, expectedSeed) << "Test case: (" << brandName << ", 0x" << std::hex << initialSeed << ")";
+            EXPECT_EQ(result.second, expectedAbility) << "Test case: (" << brandName << ", 0x" << std::hex << initialSeed << ")";
+        }
+    }
+}
+
+
+TEST(SeedHelperTest, GenerateRollWithDrinkBiasedBrands) {
+    using ExpectedSequence = std::vector<std::pair<uint32_t, std::string_view>>;
+    /// (brand name, initial seed, drink, (expected seed, expected ability))
+    const std::vector<std::tuple<std::string_view, uint32_t, std::string_view, ExpectedSequence>> testCases {
+        std::make_tuple("Forge", 0x17239048, "quick_respawn", ExpectedSequence{
+            std::make_pair(0xf57b8c75, "intensify_action"),
+            std::make_pair(0x1a58afef, "quick_respawn"),
+            std::make_pair(0xfb0c4f9d, "quick_respawn"),
+            std::make_pair(0x2d050aa2, "quick_respawn"),
+            std::make_pair(0x6709dca, "quick_respawn"),
+            std::make_pair(0x9f7c6099, "intensify_action"),
+            std::make_pair(0x7e866cee, "quick_respawn"),
+            std::make_pair(0x13e59081, "special_saver"),
+            std::make_pair(0xf7f1178e, "sub_resistance_up"),
+            std::make_pair(0x475c66a9, "swim_speed_up"),
+        }),
+        std::make_tuple("Inkline", 0x231897b1, "ink_saver_sub", ExpectedSequence{
+            std::make_pair(0xc3b4786, "ink_saver_sub"),
+            std::make_pair(0xcd25bf65, "sub_resistance_up"),
+            std::make_pair(0x23ed6221, "ink_saver_sub"),
+            std::make_pair(0xf1848924, "sub_resistance_up"),
+            std::make_pair(0x74a717f4, "ink_saver_sub"),
+            std::make_pair(0x5d6247d8, "ink_saver_sub"),
+            std::make_pair(0xa6b0ef94, "ink_saver_sub"),
+            std::make_pair(0xef49b19e, "special_saver"),
+            std::make_pair(0xf639b943, "ink_saver_sub"),
+            std::make_pair(0x554cdf72, "ink_saver_main"),
+        }),
+        std::make_tuple("Rockenberg", 0xa8b97928, "sub_power_up", ExpectedSequence{
+            std::make_pair(0x32ae369, "ink_saver_sub"),
+            std::make_pair(0xb7ba758a, "sub_power_up"),
+            std::make_pair(0x3a878850, "run_speed_up"),
+            std::make_pair(0xba305f56, "sub_power_up"),
+            std::make_pair(0x5fbfe477, "ink_resistance_up"),
+            std::make_pair(0xbb50d442, "run_speed_up"),
+            std::make_pair(0x9ac0516e, "sub_power_up"),
+            std::make_pair(0x10afb152, "quick_respawn"),
+            std::make_pair(0x48c7666b, "run_speed_up"),
+            std::make_pair(0x2540d9ae, "sub_power_up"),
+        }),
+    };
+
+    for (const auto& [brandName, initialSeed, drink, brandTestCases]: testCases) {
+        auto seedHelper = SeedHelper(brandName);
+        seedHelper.cacheDrinkWeightsMap(drink);
+
+        uint32_t seed = initialSeed;
+        for (auto& [expectedNextSeed, expectedAbility]: brandTestCases) {
+            const auto& result = seedHelper.generateRollWithDrink(seed, drink);
+            seed = result.first;
+            EXPECT_EQ(result.first, expectedNextSeed) << "Test case: (" << brandName << ", 0x" << std::hex << seed << ", 0x" << expectedNextSeed << ")";
+            EXPECT_EQ(result.second, expectedAbility) << "Test case: (" << brandName << ", 0x" << std::hex << seed << ", 0x" << expectedNextSeed << ")";
+        }
+    }
+}
 
 
 #pragma mark findSeed, no drink
