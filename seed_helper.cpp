@@ -64,7 +64,7 @@ SeedHelper::SeedHelper(std::string_view brandName): brandName(brandName), cached
     }
 }
 
-void SeedHelper::cacheDrinkWeightMap(const std::string_view &drink) {
+void SeedHelper::cacheDrinkWeightsMap(const std::string_view &drink) {
     size_t drinkIndex = getAbilityIndex(drink);
 
     const size_t currentDrinkTotalWeight = totalWeight - cachedWeights[drinkIndex];
@@ -89,6 +89,12 @@ void SeedHelper::cacheDrinkWeightMap(const std::string_view &drink) {
     cachedDrinkWeightsMap[drinkIndex] = std::make_pair(currentDrinkTotalWeight, currentDrinkWeightsMap);
 }
 
+void SeedHelper::cacheAllDrinkWeightsMaps() {
+    for (const auto& drink: abilities) {
+        cacheDrinkWeightsMap(drink);
+    }
+}
+
 uint32_t SeedHelper::advanceSeed(uint32_t seed) {
     seed ^= (seed << 13);
     seed ^= (seed >> 17);
@@ -106,6 +112,8 @@ std::string_view SeedHelper::getBrandedAbility(uint32_t seed) const {
 }
 
 std::string_view SeedHelper::getBrandedAbilityWithDrink(uint32_t seed, const std::string_view& drink) const {
+    assert(!drink.empty());
+
     const auto drinkIndex = getAbilityIndex(drink);
     const auto& [currentDrinkTotalWeight, currentDrinkWeightsMap] = cachedDrinkWeightsMap[drinkIndex];
 
@@ -121,7 +129,8 @@ std::pair<uint32_t, std::string_view> SeedHelper::generateRoll(uint32_t seed) co
 
 std::pair<uint32_t, std::string_view> SeedHelper::generateRollWithDrink(uint32_t seed, const std::string_view& drink) const {
     seed = advanceSeed(seed);
-    if (seed % 100 <= 29) {
+    const auto randomNumber = seed % 100;
+    if (randomNumber <= 29) {
         return std::make_pair(seed, drink);
     }
 
@@ -134,7 +143,7 @@ std::vector<uint32_t> SeedHelper::findSeed(const RollSequence &previousRolls) {
     // Cache weights with drinks applied.
     const auto drinksUsed = previousRolls.getDrinksUsed();
     for (const auto& drink: drinksUsed) {
-        cacheDrinkWeightMap(drink);
+        cacheDrinkWeightsMap(drink);
     }
 
     // Brute force solution: Try all possible start seeds.

@@ -19,11 +19,11 @@ class SeedHelper {
 public:
     explicit SeedHelper(std::string_view brandName);
 
-#pragma mark Brand weight
 public:
     std::string_view brandName;
 
-private:  // No drink.
+#pragma mark Brand weight, no drink
+private:
     /// Roll mod.
     uint32_t totalWeight;
     /**
@@ -40,14 +40,20 @@ private:  // No drink.
      */
     std::vector<std::string_view> cachedWeightsMap;
 
-private:  // With drink.
+#pragma mark Brand weights, with drinks
+private:
     /**
      * (total weight, weight to ability ID map)
      *
      * Indices correspond to `abilities`.
      */
     std::array<std::pair<uint32_t, std::vector<std::string_view>>, abilities.size()> cachedDrinkWeightsMap;
-    void cacheDrinkWeightMap(const std::string_view& drink);
+
+public:
+    void cacheDrinkWeightsMap(const std::string_view& drink);
+
+    /// Cache `cachedDrinkWeightsMap` for all drink types.
+    void cacheAllDrinkWeightsMaps();
 
 #pragma mark Seed
 public:
