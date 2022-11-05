@@ -310,7 +310,7 @@ TEST(SeedHelperTest, FindSeedBiasedBrandsNoDrink) {
         auto seedHelper = SeedHelper(brandName);
 
         const auto results = seedHelper.findSeed(rollSequence);
-        EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", 0x" << std::hex << ::testing::PrintToString(expectedResults) << ")";
+        EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", " << std::hex << ::testing::PrintToString(expectedResults) << ")";
 
         const auto resultsSet = std::set<uint32_t>(results.begin(), results.end());
         const auto expectedResultsSet = std::set<uint32_t>(expectedResults.begin(), expectedResults.end());
@@ -320,4 +320,180 @@ TEST(SeedHelperTest, FindSeedBiasedBrandsNoDrink) {
 
 
 #pragma mark findSeed, with drink
-// TODO:
+TEST(SeedHelperTest, FindSeedNeutralBrandsWithDrink) {
+    /// (expected results/initial seeds, (rolled ability, drink))
+    const std::vector<std::pair<std::vector<uint32_t>, std::vector<std::pair<std::string_view, std::string_view>>>> testCases {
+        std::make_pair(
+            std::vector<uint32_t>{0xeef7090, 0x200012d3, 0x201b0697, 0x26f060cf, 0x4260d297, 0xf41a453d},  // After 2 rolls: {0xc3e69912, 0xf8a0a7b6, 0x268bf9a2, 0x6389287b, 0x949facc2, 0x4cbb7136}
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("ink_resistance_up", ""),
+                std::make_pair("quick_super_jump", ""),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("sub_resistance_up", "quick_respawn"),
+                std::make_pair("special_power_up", "quick_respawn"),
+                std::make_pair("ink_resistance_up", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("run_speed_up", "quick_respawn"),
+            }
+        ),
+        std::make_pair(
+            std::vector<uint32_t>{0x9dbce285, 0xb06fb5d3, 0xfaac03bf},
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("intensify_action", "swim_speed_up"),
+                std::make_pair("swim_speed_up", "swim_speed_up"),
+                std::make_pair("swim_speed_up", "swim_speed_up"),
+                std::make_pair("ink_saver_main", "swim_speed_up"),
+                std::make_pair("sub_resistance_up", "swim_speed_up"),
+                std::make_pair("swim_speed_up", "swim_speed_up"),
+                std::make_pair("special_saver", "swim_speed_up"),
+                std::make_pair("swim_speed_up", "swim_speed_up"),
+                std::make_pair("run_speed_up", "swim_speed_up"),
+                std::make_pair("swim_speed_up", "swim_speed_up"),
+            }
+        ),
+    };
+
+    for (const auto& brandName: neutralBrands) {
+        for (const auto& [expectedResults, abilitiesAndDrinks]: testCases) {
+            SeedHelper seedHelper{brandName};
+
+            RollSequence rollSequence{};
+            for (const auto& [ability, drink]: abilitiesAndDrinks) {
+                rollSequence.addRoll(ability, drink);
+            }
+
+            const auto results = seedHelper.findSeed(rollSequence);
+            EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", " << ::testing::PrintToString(expectedResults) << ")";
+
+            const std::unordered_set<uint32_t> resultsSet(results.begin(), results.end());
+            const std::unordered_set<uint32_t> expectedResultsSet(expectedResults.begin(), expectedResults.end());
+            EXPECT_EQ(resultsSet, expectedResultsSet) << "Test case: (" << brandName << ", " << ::testing::PrintToString(expectedResults) << ")";
+        }
+    }
+}
+
+
+TEST(SeedHelperTest, FindSeedBiasedBrandsWithDrink) {
+    /// (brand, expected results/initial seeds, (rolled ability, drink))
+    const std::vector<std::tuple<std::string_view, std::vector<uint32_t>, std::vector<std::pair<std::string_view, std::string_view>>>> testCases {
+        // Likely ability
+        std::make_tuple(
+            "Skalop",
+            std::vector<uint32_t>{0xa55a5ab8, 0x499b9d8e},
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("ink_recovery_up", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("ink_saver_main", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("intensify_action", "quick_respawn"),
+                std::make_pair("sub_resistance_up", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("quick_super_jump", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+            }
+        ),
+        std::make_tuple(
+            "Skalop",
+            std::vector<uint32_t>{0xd5ab79e8},
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("ink_saver_main", ""),
+                std::make_pair("intensify_action", ""),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("sub_resistance_up", "quick_respawn"),
+                std::make_pair("run_speed_up", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("quick_respawn", "quick_respawn"),
+                std::make_pair("quick_super_jump", "quick_respawn"),
+                std::make_pair("sub_resistance_up", "quick_respawn"),
+            }
+        ),
+
+        // Unlikely ability
+        std::make_tuple(
+            "SquidForce",
+            std::vector<uint32_t>{0x75068636},
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("ink_resistance_up", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("special_power_up", "ink_saver_main"),
+                std::make_pair("quick_super_jump", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("special_saver", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("sub_resistance_up", "ink_saver_main"),
+            }
+        ),
+        std::make_tuple(
+            "SquidForce",
+            std::vector<uint32_t>{0xfd01460a, 0xae7aac07},  // After 2 rolls: {0xace3d296, 0xa802cdef}
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("quick_respawn", ""),
+                std::make_pair("intensify_action", ""),
+                std::make_pair("special_power_up", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("ink_saver_main", "ink_saver_main"),
+                std::make_pair("sub_resistance_up", "ink_saver_main"),
+                std::make_pair("ink_recovery_up", "ink_saver_main"),
+                std::make_pair("quick_super_jump", "ink_saver_main"),
+            }
+        ),
+
+        // Neutral ability
+        std::make_tuple(
+            "Takoroka",
+            std::vector<uint32_t>{},  // No possible seed.
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("ink_recovery_up", "run_speed_up"),
+                std::make_pair("quick_respawn", "run_speed_up"),
+                std::make_pair("special_saver", "run_speed_up"),
+                std::make_pair("sub_resistance_up", "run_speed_up"),
+                std::make_pair("ink_saver_sub", "run_speed_up"),
+                std::make_pair("run_speed_up", "run_speed_up"),
+                std::make_pair("quick_super_jump", "run_speed_up"),
+                std::make_pair("special_power_up", "run_speed_up"),
+                std::make_pair("sub_power_up", "run_speed_up"),
+                std::make_pair("quick_respawn", "run_speed_up"),
+            }
+        ),
+        std::make_tuple(
+            "Takoroka",
+            std::vector<uint32_t>{0xdc3f06a8},
+            std::vector<std::pair<std::string_view, std::string_view>>{
+                std::make_pair("ink_saver_sub", "run_speed_up"),
+                std::make_pair("run_speed_up", "run_speed_up"),
+                std::make_pair("ink_recovery_up", "run_speed_up"),
+                std::make_pair("run_speed_up", "run_speed_up"),
+                std::make_pair("ink_resistance_up", "run_speed_up"),
+                std::make_pair("run_speed_up", "run_speed_up"),
+                std::make_pair("special_charge_up", "run_speed_up"),
+                std::make_pair("ink_resistance_up", "run_speed_up"),
+                std::make_pair("ink_recovery_up", "run_speed_up"),
+                std::make_pair("sub_resistance_up", "run_speed_up"),
+            }
+        ),
+    };
+
+    for (const auto& [brandName, expectedResults, abilitiesAndDrinks]: testCases) {
+        SeedHelper seedHelper{brandName};
+
+        RollSequence rollSequence{};
+        for (const auto& [ability, drink]: abilitiesAndDrinks) {
+            rollSequence.addRoll(ability, drink);
+        }
+
+        const auto results = seedHelper.findSeed(rollSequence);
+        EXPECT_EQ(results.size(), expectedResults.size()) << "Test case: (" << brandName << ", " << ::testing::PrintToString(expectedResults) << ")";
+
+        const std::unordered_set<uint32_t> resultsSet(results.begin(), results.end());
+        const std::unordered_set<uint32_t> expectedResultsSet(expectedResults.begin(), expectedResults.end());
+        EXPECT_EQ(resultsSet, expectedResultsSet) << "Test case: (" << brandName << ", " << ::testing::PrintToString(expectedResults) << ")";
+    }
+}
