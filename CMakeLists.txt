@@ -4,6 +4,6 @@ project(Splatoon-3-Gear-Helper-CPP)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Splatoon-3-Gear-Helper-CPP main.cpp seed_helper.cpp data/abilities.cpp)
+add_executable(Splatoon-3-Gear-Helper-CPP main.cpp seed_helper.cpp data/abilities.cpp data/roll_sequence.cpp)
 
 add_subdirectory(tests)

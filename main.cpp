@@ -1,16 +1,13 @@
 #include <iostream>
 
 #include "seed_helper.h"
+#include "data/roll_sequence.h"
 
 
 void find(const std::string_view& brandName, const std::vector<std::string_view>& previousRolls) {
-//    std::cout << brandName << std::endl;
-//    for (const auto& r: previousRolls) {
-//        std::cout << r << std::endl;
-//    }
-
-    auto seedHelper = SeedHelper(brandName);
-    const auto results = seedHelper.findSeed(previousRolls);
+    SeedHelper seedHelper(brandName);
+    RollSequence rollSequence(previousRolls);
+    const auto results = seedHelper.findSeed(rollSequence, 8);
     if (!results.empty()) {
         for (const auto& result: results) {
             std::cout << std::hex << "0x" << result << "\n";
