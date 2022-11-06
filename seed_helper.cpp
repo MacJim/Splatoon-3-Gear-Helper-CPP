@@ -5,6 +5,7 @@
 #include "seed_helper.h"
 
 #include <numeric>
+#include <future>
 
 #include "data/abilities.h"
 #include "data/brands.h"
@@ -139,18 +140,12 @@ std::pair<uint32_t, std::string_view> SeedHelper::generateRollWithDrink(uint32_t
     return std::make_pair(seed, ability);
 }
 
-std::vector<uint32_t> SeedHelper::findSeed(const RollSequence &previousRolls) {
-    // Cache weights with drinks applied.
-    const auto drinksUsed = previousRolls.getDrinksUsed();
-    for (const auto& drink: drinksUsed) {
-        cacheDrinkWeightsMap(drink);
-    }
-
+std::vector<uint32_t> SeedHelper::findSeedWorker(const RollSequence &previousRolls, const uint32_t seedStart, const uint32_t seedStop) const {
     // Brute force solution: Try all possible start seeds.
     auto returnValue = std::vector<uint32_t>();
 
-    uint32_t initial_seed = 0;
-    while (initial_seed++ != UINT32_MAX) {  // I hate `++`, but for an unsigned int this seems to be the best solution.
+    uint32_t initial_seed = seedStart;
+    while (initial_seed++ != seedStop) {  // I hate `++`, but for an unsigned int this seems to be the best solution.
         auto seed = initial_seed;
         auto valid = true;
         for (const auto& [expectedResult, drink]: previousRolls) {
@@ -173,6 +168,49 @@ std::vector<uint32_t> SeedHelper::findSeed(const RollSequence &previousRolls) {
     }
 
     return returnValue;
+}
+
+std::vector<uint32_t> SeedHelper::findSeed(const RollSequence &previousRolls, const size_t workersCount) {
+    // Cache weights with drinks applied.
+    const auto drinksUsed = previousRolls.getDrinksUsed();
+    for (const auto& drink: drinksUsed) {
+        cacheDrinkWeightsMap(drink);
+    }
+
+    if (workersCount == 0) {
+        // Don't use worker threads.
+        return findSeedWorker(previousRolls, 0, UINT32_MAX);
+    } else {
+        // Use multiple threads.
+        std::vector<std::future<std::vector<uint32_t>>> futures{};
+        futures.reserve(workersCount);
+
+        // First (workersCount - 1) tasks.
+        for (size_t i = 0; i < (workersCount - 1); i += 1) {
+            const auto seedStart = UINT32_MAX / workersCount * i;
+            const auto seedStop = UINT32_MAX / workersCount * (i + 1) - 1;
+            auto currentFuture = std::async(std::launch::async, [this, &previousRolls, seedStart, seedStop]() {
+                return this->findSeedWorker(previousRolls, seedStart, seedStop);
+            });  // Dirty workaround using lambda 😂.
+            futures.push_back(std::move(currentFuture));
+        }
+        // Final task: Note `finalStop`.
+        auto finalFuture = std::async(std::launch::async, [this, &previousRolls, &workersCount]() {
+            const auto finalStart = UINT32_MAX / workersCount * (workersCount - 1);
+            constexpr auto finalStop = UINT32_MAX;
+            return this->findSeedWorker(previousRolls, finalStart, finalStop);
+        });
+        futures.push_back(std::move(finalFuture));
+
+        // Construct return value.
+        std::vector<uint32_t> returnValue{};
+        for (auto& future: futures) {
+            const auto workerResults = future.get();
+            returnValue.insert(returnValue.end(), workerResults.begin(), workerResults.end());
+        }
+
+        return returnValue;
+    }
 }
 
 

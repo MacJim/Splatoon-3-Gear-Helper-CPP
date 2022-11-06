@@ -75,8 +75,12 @@ public:
     std::pair<uint32_t, std::string_view> generateRollWithDrink(uint32_t seed, const std::string_view& drink) const;
 
 #pragma mark Find seed
+private:
+    /// Find valid seeds in the range [seedStart, seedStop].
+    std::vector<uint32_t> findSeedWorker(const RollSequence& previousRolls, uint32_t seedStart, uint32_t seedStop) const;
+
 public:
-    std::vector<uint32_t> findSeed(const RollSequence& previousRolls);
+    std::vector<uint32_t> findSeed(const RollSequence& previousRolls, size_t workersCount = 0);
 };
 
 

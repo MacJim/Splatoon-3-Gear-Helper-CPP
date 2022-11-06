@@ -497,3 +497,31 @@ TEST(SeedHelperTest, FindSeedBiasedBrandsWithDrink) {
         EXPECT_EQ(resultsSet, expectedResultsSet) << "Test case: (" << brandName << ", " << ::testing::PrintToString(expectedResults) << ")";
     }
 }
+
+
+#pragma mark Split seed range
+TEST(SeedHelperTest, SplitSeedRange) {
+    for (size_t segmentsCount = 1; segmentsCount <= 10000; segmentsCount += 1) {
+        std::vector<std::pair<uint32_t, uint32_t>> segments{};
+        segments.reserve(segmentsCount);
+
+        // Generate
+        for (size_t i = 0; i < (segmentsCount - 1); i += 1) {
+            const uint32_t start = UINT32_MAX / segmentsCount * i;
+            const uint32_t stop = UINT32_MAX / segmentsCount * (i + 1) - 1;
+            segments.emplace_back(start, stop);
+        }
+        if (segmentsCount > 0) {
+            const uint32_t finalStart = UINT32_MAX / segmentsCount * (segmentsCount - 1);
+            segments.emplace_back(finalStart, UINT32_MAX);
+        }
+
+        // Verify
+        uint64_t currentNum = 0;
+        for (const auto [start, stop]: segments) {
+            EXPECT_EQ(currentNum, start) << "Segments count: " << segmentsCount;
+            currentNum = static_cast<uint64_t>(stop) + 1;
+        }
+        EXPECT_EQ(currentNum - 1, UINT32_MAX) << "Doesn't end on `UINT32_MAX`. Segments count: " << segmentsCount;
+    }
+}
