@@ -8,7 +8,7 @@
 #include <exception>
 
 
-size_t getAbilityIndex(const std::string_view& ability) {
+size_t getAbilityIndex(const std::string_view ability) {
     for (size_t i = 0; i < ability.size(); i += 1) {
         if (ability == abilities[i]) {
             return i;

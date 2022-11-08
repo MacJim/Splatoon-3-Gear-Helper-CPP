@@ -50,7 +50,7 @@ private:
     std::array<std::pair<uint32_t, std::vector<std::string_view>>, abilities.size()> cachedDrinkWeightsMap;
 
 public:
-    void cacheDrinkWeightsMap(const std::string_view& drink);
+    void cacheDrinkWeightsMap(std::string_view drink);
 
     /// Cache `cachedDrinkWeightsMap` for all drink types.
     void cacheAllDrinkWeightsMaps();
@@ -63,7 +63,7 @@ public:
 public:
     std::string_view getBrandedAbility(uint32_t seed) const;
 
-    std::string_view getBrandedAbilityWithDrink(uint32_t seed, const std::string_view& drink) const;
+    std::string_view getBrandedAbilityWithDrink(uint32_t seed, std::string_view drink) const;
 
 public:
     /**
@@ -72,7 +72,7 @@ public:
      */
     std::pair<uint32_t, std::string_view> generateRoll(uint32_t seed) const;
 
-    std::pair<uint32_t, std::string_view> generateRollWithDrink(uint32_t seed, const std::string_view& drink) const;
+    std::pair<uint32_t, std::string_view> generateRollWithDrink(uint32_t seed, std::string_view drink) const;
 
 #pragma mark Find seed
 private:

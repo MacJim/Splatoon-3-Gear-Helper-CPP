@@ -28,7 +28,7 @@ constexpr std::array<std::string_view, 14> abilities = {
 };
 
 /// Get ability index in `abilities`.
-size_t getAbilityIndex(const std::string_view& ability);
+size_t getAbilityIndex(std::string_view ability);
 
 constexpr std::string_view placeholderAbility = "unknown";
 

@@ -49,10 +49,10 @@ public:
     explicit RollSequence(const std::vector<std::string_view>& rolls);
 
 public:
-    inline void addRoll(const std::string_view& ability) {
+    inline void addRoll(const std::string_view ability) {
         data.emplace_back(ability, "");
     }
-    inline void addRoll(const std::string_view& ability, const std::string_view& drink) {
+    inline void addRoll(const std::string_view ability, const std::string_view drink) {
         data.emplace_back(ability, drink);
     }
 

@@ -4,7 +4,7 @@
 #include "data/roll_sequence.h"
 
 
-void find(const std::string_view& brandName, const std::vector<std::string_view>& previousRolls) {
+void find(const std::string_view brandName, const std::vector<std::string_view>& previousRolls) {
     SeedHelper seedHelper(brandName);
     RollSequence rollSequence(previousRolls);
     const auto results = seedHelper.findSeed(rollSequence, 8);
