@@ -13,6 +13,9 @@
 
 class RollSequence {
 public:
+    /**
+     * {(rolled ability, drink)}
+     */
     using DataType = std::vector<std::pair<std::string_view, std::string_view>>;
 private:
     DataType data;
