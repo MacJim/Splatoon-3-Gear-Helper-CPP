@@ -1,0 +1,25 @@
+# The gear's name (any string).
+name: Crimson Parashooter
+
+# Brand name (defined in `brands.h`).
+brand: Annaki
+
+# The initial seed that generates the first roll (optional field).
+#
+# Either:
+# - null
+# - A 32-bit unsigned integer in decimal
+#   - NOT in HEX (for simplicity)
+initial_seed: null
+
+# Rolled abilities.
+abilities:
+  # Variant 1: Rolled ability only.
+  - swim_speed_up
+  # Variant 2: A dictionary of:
+  # - Rolled ability
+  # - Drink used (optional field)
+  # - Seed for next roll (currently unused): 32-bit unsigned integer in decimal (NOT in HEX)
+  - ability: ink_saver_main
+    drink: ink_saver_sub
+    next_seed: 12345

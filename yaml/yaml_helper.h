@@ -36,8 +36,8 @@ public:
         return initialSeed;
     }
     void setInitialSeed(uint32_t seed);
-    void addRoll(std::string_view ability);
-    void addRoll(std::string_view ability, std::string_view drink);
+    void addRoll(Ability ability);
+    void addRoll(Ability ability, Ability drink);
     inline const RollSequence& getRollSequence() {
         return rollSequence;
     }

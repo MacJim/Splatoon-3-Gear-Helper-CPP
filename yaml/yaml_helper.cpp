@@ -15,12 +15,12 @@ void YamlFile::setInitialSeed(uint32_t seed) {
     dirty = true;
 }
 
-void YamlFile::addRoll(const std::string_view ability) {
+void YamlFile::addRoll(Ability ability) {
     rollSequence.addRoll(ability);
     dirty = true;
 }
 
-void YamlFile::addRoll(std::string_view ability, std::string_view drink) {
+void YamlFile::addRoll(Ability ability, Ability drink) {
     rollSequence.addRoll(ability, drink);
     dirty = true;
 }
@@ -44,17 +44,32 @@ void YamlFile::load() {
         initialSeed = root["initial_seed"].as<uint32_t>();
     }
 
-    if (root["abilities"]) {
-        const auto& abilitiesNode = root["abilities"];
+    const auto& abilitiesNode = root["abilities"];
+    if (abilitiesNode) {
         for (YAML::const_iterator it = abilitiesNode.begin(); it != abilitiesNode.end(); it ++) {
             if (it->IsMap()) {
                 // Ability and drink.
-                // TODO:
-                throw std::runtime_error("");
+                const auto abilityNode = (*it)["ability"];
+                if (!abilityNode) {
+                    throw std::runtime_error("No ability key in map.");
+                }
+                const auto abilityId = abilityNode.as<std::string>();
+                const auto ability = AbilityHelper::fromId(abilityId);
+
+                const auto drinkNode = (*it)["drink"];
+                if (drinkNode) {
+                    // Drink used.
+                    const auto drinkId = drinkNode.as<std::string>();
+                    const auto drink = AbilityHelper::fromId(drinkId);
+                    rollSequence.addRoll(ability, drink);
+                } else {
+                    // No drink used.
+                    rollSequence.addRoll(ability);
+                }
             } else {
                 // Ability only.
-                // TODO: This temporary string will be destroyed, invalidating `RollSequence`'s `string_view` data.
-                const auto ability = it->as<std::string>();
+                const auto abilityId = it->as<std::string>();
+                const auto ability = AbilityHelper::fromId(abilityId);
                 rollSequence.addRoll(ability);
             }
         }
@@ -74,12 +89,15 @@ void YamlFile::saveIfDirty() {
     }
     if (!rollSequence.empty()) {
         for (const auto [ability, drink]: rollSequence) {
-            if (drink.empty()) {
-                root["abilities"].push_back(ability.data());
+            const std::string abilityId{AbilityHelper::getId(ability)};
+            if (drink == Ability::noDrink) {
+                root["abilities"].push_back(abilityId);
             } else {
+                const std::string drinkId{AbilityHelper::getId(drink)};
+
                 YAML::Node currentNode{};
-                currentNode["ability"] = ability.data();
-                currentNode["drink"] = drink.data();
+                currentNode["ability"] = abilityId;
+                currentNode["drink"] = drinkId;
                 root["abilities"].push_back(currentNode);
             }
         }

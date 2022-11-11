@@ -72,45 +72,46 @@ public:
 #pragma mark Tests
 TEST(YamlHelperTest, CreateSaveLoadNoDrink) {
     TemporaryFile temporaryFile{"splatoon_no_drink.yaml"};
+    const auto filename = temporaryFile.getFilename();
+    std::string testCaseDescription = "Temporary file: " + filename;
 
     // Create and save.
     const std::string name{"Crimson Parashooter"};
     const std::string brand{"Annaki"};
     auto rolls = getRandomRolls(100);
 
-    std::string testCaseDescription = "Temporary file: " + temporaryFile.getFilename();
-
     {
-        YamlFile yamlFile{temporaryFile.getFilename(), name, brand, {}};
+        YamlFile yamlFile{filename, name, brand, {}};
         for (const auto roll: rolls) {
             yamlFile.addRoll(roll);
         }
-        // The file should be saved by the destructor.
+        // The file should be saved by `YamlFile`'s destructor.
     }
 
     ASSERT_TRUE(std::filesystem::is_regular_file(temporaryFile.path)) << testCaseDescription;
 
     // Load.
-    YamlFile yamlFile{temporaryFile.getFilename()};
+    YamlFile yamlFile{filename};
     EXPECT_EQ(yamlFile.getName(), name) << testCaseDescription;
     EXPECT_EQ(yamlFile.getBrand(), brand) << testCaseDescription;
     EXPECT_FALSE(yamlFile.getInitialSeed().has_value()) << testCaseDescription;
 
-    // TODO: Abilities aren't loaded properly for the moment.
-//    auto it1 = rolls.begin();
-//    auto it2 = yamlFile.getRollSequence().begin();
-//    while (it1 != rolls.end()) {
-//        EXPECT_EQ(*it1, it2->first) << testCaseDescription;
-//        EXPECT_EQ(it2->second, "") << testCaseDescription;
-//
-//        it1 += 1;
-//        it2 += 1;
-//    }
+    auto it1 = rolls.begin();
+    auto it2 = yamlFile.getRollSequence().begin();
+    while (it1 != rolls.end()) {
+        EXPECT_EQ(*it1, it2->first) << testCaseDescription;
+        EXPECT_EQ(it2->second, Ability::noDrink) << testCaseDescription;
+
+        it1 += 1;
+        it2 += 1;
+    }
 }
 
 
 TEST(YamlHelperTest, CreateSaveLoadWithDrink) {
     TemporaryFile temporaryFile{"splatoon_with_drink.yaml"};
+    const auto filename = temporaryFile.getFilename();
+    std::string testCaseDescription = "Temporary file: " + filename;
 
     // Create and save.
     const std::string name{"Wasabi Tabi"};
@@ -118,17 +119,30 @@ TEST(YamlHelperTest, CreateSaveLoadWithDrink) {
     const uint32_t initialSeed = UINT32_MAX - 1;
     auto rollsAndDrinks = getRandomRollsAndDrinks(100);
 
-    std::string testCaseDescription = "Temporary file: " + temporaryFile.getFilename();
-
     {
-        YamlFile yamlFile{temporaryFile.getFilename(), name, brand, initialSeed};
+        YamlFile yamlFile{filename, name, brand, initialSeed};
         for (const auto [roll, drink]: rollsAndDrinks) {
             yamlFile.addRoll(roll, drink);
         }
-        // The file should be saved by the destructor.
+        // The file should be saved by `YamlFile`'s destructor.
     }
 
     ASSERT_TRUE(std::filesystem::is_regular_file(temporaryFile.path)) << testCaseDescription;
 
-    // TODO: Load.
+    // Load.
+    YamlFile yamlFile{filename};
+    EXPECT_EQ(yamlFile.getName(), name) << testCaseDescription;
+    EXPECT_EQ(yamlFile.getBrand(), brand) << testCaseDescription;
+    EXPECT_TRUE(yamlFile.getInitialSeed().has_value()) << testCaseDescription;
+    EXPECT_EQ(yamlFile.getInitialSeed().value(), initialSeed) << testCaseDescription;
+
+    auto it1 = rollsAndDrinks.begin();
+    auto it2 = yamlFile.getRollSequence().begin();
+    while (it1 != rollsAndDrinks.end()) {
+        EXPECT_EQ(it1->first, it2->first) << testCaseDescription;
+        EXPECT_EQ(it1->second, it2->second) << testCaseDescription;
+
+        it1 += 1;
+        it2 += 1;
+    }
 }
