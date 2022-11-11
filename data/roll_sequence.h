@@ -10,13 +10,15 @@
 #include <unordered_set>
 #include <string_view>
 
+#include "ability.h"
+
 
 class RollSequence {
 public:
     /**
      * {(rolled ability, drink)}
      */
-    using DataType = std::vector<std::pair<std::string_view, std::string_view>>;
+    using DataType = std::vector<std::pair<Ability, Ability>>;
 private:
     DataType data;
 
@@ -49,13 +51,13 @@ public:
      *
      * Currently only used in tests.
      */
-    explicit RollSequence(const std::vector<std::string_view>& rolls);
+    explicit RollSequence(const std::vector<Ability>& rolls);
 
 public:
-    inline void addRoll(const std::string_view ability) {
-        data.emplace_back(ability, "");
+    inline void addRoll(const Ability ability) {
+        data.emplace_back(ability, Ability::noDrink);
     }
-    inline void addRoll(const std::string_view ability, const std::string_view drink) {
+    inline void addRoll(const Ability ability, const Ability drink) {
         data.emplace_back(ability, drink);
     }
 
@@ -65,7 +67,7 @@ public:
      *
      * Used to calculate/cache the "weights map" for each type of drink.
      */
-    [[nodiscard]] std::unordered_set<std::string_view> getDrinksUsed() const;
+    [[nodiscard]] std::unordered_set<Ability> getDrinksUsed() const;
 };
 
 

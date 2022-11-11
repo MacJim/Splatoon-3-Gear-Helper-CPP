@@ -23,10 +23,10 @@ enable_testing()
 add_executable(seed_helper_test seed_helper_test.cpp ../seed_helper.cpp ../data/abilities.cpp ../data/roll_sequence.cpp)
 target_link_libraries(seed_helper_test GTest::gtest_main)
 
-add_executable(roll_sequence_test roll_sequence_test.cpp ../data/roll_sequence.cpp)
+add_executable(roll_sequence_test roll_sequence_test.cpp roll_randomizer.cpp ../data/roll_sequence.cpp)
 target_link_libraries(roll_sequence_test GTest::gtest_main)
 
-add_executable(yaml_helper_test yaml_helper_test.cpp ../yaml/yaml_helper.cpp)
+add_executable(yaml_helper_test yaml_helper_test.cpp roll_randomizer.cpp ../yaml/yaml_helper.cpp)
 target_link_libraries(yaml_helper_test yaml-cpp GTest::gtest_main)
 
 add_executable(ability_helper_test ability_helper_test.cpp ../data/ability.cpp)

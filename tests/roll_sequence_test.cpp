@@ -21,7 +21,7 @@ TEST(RollSequenceTest, ConstructFromSequence) {
         auto it2 = seq.begin();
         while (it1 != rolls.end()) {
             EXPECT_EQ(*it1, it2->first) << testCaseDescription;
-            EXPECT_EQ(it2->second, "") << testCaseDescription;
+            EXPECT_EQ(it2->second, Ability::noDrink) << testCaseDescription;
             it1 += 1;
             it2 += 1;
         }
@@ -46,7 +46,7 @@ TEST(RollSequenceTest, AddRollNoDrink) {
         auto it2 = seq.begin();
         while (it1 != rolls.end()) {
             EXPECT_EQ(*it1, it2->first) << testCaseDescription;
-            EXPECT_EQ(it2->second, "") << testCaseDescription;
+            EXPECT_EQ(it2->second, Ability::noDrink) << testCaseDescription;
             it1 += 1;
             it2 += 1;
         }
@@ -81,17 +81,17 @@ TEST(RollSequenceTest, AddRollWithDrink) {
 
 TEST(RollSequenceTest, GetUsedDrinks) {
     const RollSequence::DataType rollsAndDrinks{
-        std::make_pair(abilities[0], abilities[1]),
-        std::make_pair(abilities[2], abilities[2]),
-        std::make_pair(abilities[3], ""),
-        std::make_pair(abilities[5], abilities[6]),
+        std::make_pair(static_cast<Ability>(0), static_cast<Ability>(1)),
+        std::make_pair(static_cast<Ability>(2), static_cast<Ability>(2)),
+        std::make_pair(static_cast<Ability>(3), Ability::noDrink),
+        std::make_pair(static_cast<Ability>(5), static_cast<Ability>(6)),
     };
-    const std::unordered_set expectedResult{abilities[1], abilities[2], abilities[6]};
+    const std::unordered_set expectedResult{static_cast<Ability>(1), static_cast<Ability>(2), static_cast<Ability>(6)};
 
     RollSequence seq{};
 
     for (const auto& [roll, drink]: rollsAndDrinks) {
-        if (drink.empty()) {
+        if (drink == Ability::noDrink) {
             seq.addRoll(roll);
         } else {
             seq.addRoll(roll, drink);
