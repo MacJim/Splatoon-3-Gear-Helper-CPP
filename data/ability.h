@@ -34,7 +34,8 @@ enum class Ability: size_t {
 
 
 namespace AbilityHelper {
-    constexpr std::array<std::string_view, 14> ids = {
+    constexpr size_t abilitiesCount = 14;
+    constexpr std::array<std::string_view, abilitiesCount> ids = {
         "ink_saver_main",
         "ink_saver_sub",
         "ink_recovery_up",

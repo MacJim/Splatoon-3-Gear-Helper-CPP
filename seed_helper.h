@@ -7,10 +7,10 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 
-#include "data/abilities.h"
 #include "data/roll_sequence.h"
 
 
@@ -20,7 +20,7 @@ public:
     explicit SeedHelper(std::string_view brandName);
 
 public:
-    std::string_view brandName;
+    std::string brandName;
 
 #pragma mark Brand weight, no drink
 private:
@@ -28,32 +28,33 @@ private:
     uint32_t totalWeight;
     /**
      * Each ability's weight (without drink).
-     * Indices correspond to `abilities`.
+     * Indices correspond to `Ability`'s values and `AbilityHelper::ids`.
      *
+     * - Used to calculate `rollToAbilityMap`
      * - Not used for calculating abilities
-     * - May be used for calculating `cachedDrinkWeightsMap`
+     * - May be used for calculating `drinkRollToAbilityMap` if drinks are provided in `findSeed`'s roll sequence
      */
-    std::array<uint32_t, abilities.size()> cachedWeights;
+    std::array<uint32_t, AbilityHelper::abilitiesCount> cachedWeights;
     /**
-     * Weight to ability ID map.
+     * Roll to ability map (without drink).
      * Calculated once upon class construction.
      */
-    std::vector<std::string_view> cachedWeightsMap;
+    std::vector<Ability> rollToAbilityMap;
 
 #pragma mark Brand weights, with drinks
 private:
     /**
-     * (total weight, weight to ability ID map)
+     * (total weight, roll to ability map)
      *
-     * Indices correspond to `abilities`.
+     * Indices: Drink used: Correspond to `Ability`'s values and `AbilityHelper::ids`.
      */
-    std::array<std::pair<uint32_t, std::vector<std::string_view>>, abilities.size()> cachedDrinkWeightsMap;
+    std::array<std::pair<uint32_t, std::vector<Ability>>, AbilityHelper::abilitiesCount> drinkRollToAbilityMap;
 
 public:
-    void cacheDrinkWeightsMap(std::string_view drink);
+    void cacheDrinkRollToAbilityMap(Ability drink);
 
-    /// Cache `cachedDrinkWeightsMap` for all drink types.
-    void cacheAllDrinkWeightsMaps();
+    /// Cache `drinkRollToAbilityMap` for all drink types.
+    void cacheAllDrinkRollToAbilityMaps();
 
 #pragma mark Seed
 public:
@@ -61,23 +62,23 @@ public:
 
 #pragma mark Roll abilities
 public:
-    std::string_view getBrandedAbility(uint32_t seed) const;
+    [[nodiscard]] Ability getBrandedAbility(uint32_t seed) const;
 
-    std::string_view getBrandedAbilityWithDrink(uint32_t seed, std::string_view drink) const;
+    [[nodiscard]] Ability getBrandedAbilityWithDrink(uint32_t seed, Ability drink) const;
 
 public:
     /**
      * Roll once and generate the next ability.
      * @return (next seed, next ability)
      */
-    std::pair<uint32_t, std::string_view> generateRoll(uint32_t seed) const;
+    [[nodiscard]] std::pair<uint32_t, Ability> generateRoll(uint32_t seed) const;
 
-    std::pair<uint32_t, std::string_view> generateRollWithDrink(uint32_t seed, std::string_view drink) const;
+    [[nodiscard]] std::pair<uint32_t, Ability> generateRollWithDrink(uint32_t seed, Ability drink) const;
 
 #pragma mark Find seed
 private:
     /// Find valid seeds in the range [seedStart, seedStop].
-    std::vector<uint32_t> findSeedWorker(const RollSequence& previousRolls, uint32_t seedStart, uint32_t seedStop) const;
+    [[nodiscard]] std::vector<uint32_t> findSeedWorker(const RollSequence& previousRolls, uint32_t seedStart, uint32_t seedStop) const;
 
 public:
     std::vector<uint32_t> findSeed(const RollSequence& previousRolls, size_t workersCount = 0);
