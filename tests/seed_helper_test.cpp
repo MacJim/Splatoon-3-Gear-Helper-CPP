@@ -95,7 +95,6 @@ TEST(SeedHelperTest, AdvanceSeedToEndOfRollSequenceWithDrink) {
 
     // Test.
     SeedHelper seedHelper{brand};
-    seedHelper.cacheDrinkRollToAbilityMap(drink);
     const auto [validity, finalSeed] = seedHelper.advanceSeedToEndOfRollSequence(initialSeed, rollSequence);
     EXPECT_TRUE(validity);
     EXPECT_EQ(finalSeed, expectedFinalSeed);

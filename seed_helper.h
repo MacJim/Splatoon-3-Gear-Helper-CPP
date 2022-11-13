@@ -68,7 +68,7 @@ public:
      *
      * @return (initialSeed validity, seed after the roll sequence)
      */
-    [[nodiscard]] std::pair<bool, uint32_t> advanceSeedToEndOfRollSequence(uint32_t initialSeed, const RollSequence& rollSequence) const;
+    [[nodiscard]] std::pair<bool, uint32_t> advanceSeedToEndOfRollSequence(uint32_t initialSeed, const RollSequence& rollSequence);
 
 #pragma mark Roll abilities
 public:

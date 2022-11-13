@@ -103,7 +103,13 @@ uint32_t SeedHelper::advanceSeed(uint32_t seed) {
     return seed;
 }
 
-std::pair<bool, uint32_t> SeedHelper::advanceSeedToEndOfRollSequence(const uint32_t initialSeed, const RollSequence &rollSequence) const {
+std::pair<bool, uint32_t> SeedHelper::advanceSeedToEndOfRollSequence(const uint32_t initialSeed, const RollSequence &rollSequence) {
+    // Cache weights with drinks applied.
+    const auto drinksUsed = rollSequence.getDrinksUsed();
+    for (const auto drink: drinksUsed) {
+        cacheDrinkRollToAbilityMap(drink);
+    }
+
     bool validity = true;
     uint32_t seed = initialSeed;
 
