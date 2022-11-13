@@ -60,6 +60,16 @@ public:
 public:
     static uint32_t advanceSeed(uint32_t seed);
 
+    /**
+     * Advance from `initialSeed` to the end of the roll sequence.
+     * The roll sequence is verified against the initial initialSeed.
+     *
+     * Used in predictions.
+     *
+     * @return (initialSeed validity, seed after the roll sequence)
+     */
+    [[nodiscard]] std::pair<bool, uint32_t> advanceSeedToEndOfRollSequence(uint32_t initialSeed, const RollSequence& rollSequence) const;
+
 #pragma mark Roll abilities
 public:
     [[nodiscard]] Ability getBrandedAbility(uint32_t seed) const;

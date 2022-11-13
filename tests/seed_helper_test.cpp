@@ -28,6 +28,80 @@ TEST(SeedHelperTest, AdvanceSeed) {
 }
 
 
+TEST(SeedHelperTest, AdvanceSeedToEndOfRollSequenceEmptyRoll) {
+    // Test case.
+    const std::string brand{"Tentatek"};
+    constexpr uint32_t initialSeed = 0x12345678;
+    const RollSequence rollSequence{};
+    constexpr uint32_t expectedFinalSeed = initialSeed;
+
+    // Test.
+    SeedHelper seedHelper{brand};
+    const auto [validity, finalSeed] = seedHelper.advanceSeedToEndOfRollSequence(initialSeed, rollSequence);
+    EXPECT_TRUE(validity);
+    EXPECT_EQ(finalSeed, expectedFinalSeed);
+}
+
+
+TEST(SeedHelperTest, AdvanceSeedToEndOfRollSequenceNoDrink) {
+    // Test case.
+    const std::string brand{"Toni Kensa"};
+    constexpr uint32_t initialSeed = 0xb0980324;
+    const std::vector<Ability> rolledAbilities {
+        Ability::inkSaverMain,
+        Ability::specialPowerUp,
+        Ability::inkSaverMain,
+        Ability::inkSaverMain,
+        Ability::inkSaverMain,
+        Ability::specialPowerUp,
+        Ability::specialSaver,
+        Ability::intensifyAction,
+        Ability::subResistanceUp,
+        Ability::intensifyAction,
+    };
+    const RollSequence rollSequence{rolledAbilities};
+    constexpr uint32_t expectedFinalSeed = 0x88554788;
+
+    // Test.
+    SeedHelper seedHelper{brand};
+    const auto [validity, finalSeed] = seedHelper.advanceSeedToEndOfRollSequence(initialSeed, rollSequence);
+    EXPECT_TRUE(validity);
+    EXPECT_EQ(finalSeed, expectedFinalSeed);
+}
+
+
+TEST(SeedHelperTest, AdvanceSeedToEndOfRollSequenceWithDrink) {
+    // Test case.
+    const std::string brand{"Zink"};
+    constexpr uint32_t initialSeed = 0x907b1ae9;
+    constexpr Ability drink = Ability::quickSuperJump;
+    const std::vector<Ability> rolledAbilities {
+        Ability::quickSuperJump,
+        Ability::quickSuperJump,
+        Ability::quickSuperJump,
+        Ability::specialPowerUp,
+        Ability::swimSpeedUp,
+        Ability::specialSaver,
+        Ability::quickSuperJump,
+        Ability::inkSaverMain,
+        Ability::quickSuperJump,
+        Ability::inkRecoveryUp,
+    };
+    RollSequence rollSequence{};
+    for (const auto ability: rolledAbilities) {
+        rollSequence.addRoll(ability, drink);
+    }
+    constexpr uint32_t expectedFinalSeed = 0x6aeddb71;
+
+    // Test.
+    SeedHelper seedHelper{brand};
+    seedHelper.cacheDrinkRollToAbilityMap(drink);
+    const auto [validity, finalSeed] = seedHelper.advanceSeedToEndOfRollSequence(initialSeed, rollSequence);
+    EXPECT_TRUE(validity);
+    EXPECT_EQ(finalSeed, expectedFinalSeed);
+}
+
+
 #pragma mark getBrandedAbility
 TEST(SeedHelperTest, GetBrandedAbilityNeutralBrands) {
     /// (seed, expected result)

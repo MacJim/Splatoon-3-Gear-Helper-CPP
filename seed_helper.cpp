@@ -103,6 +103,26 @@ uint32_t SeedHelper::advanceSeed(uint32_t seed) {
     return seed;
 }
 
+std::pair<bool, uint32_t> SeedHelper::advanceSeedToEndOfRollSequence(const uint32_t initialSeed, const RollSequence &rollSequence) const {
+    bool validity = true;
+    uint32_t seed = initialSeed;
+
+    for (const auto [expectedAbility, drink]: rollSequence) {
+        Ability ability;
+        if (drink == Ability::noDrink) {
+            std::tie(seed, ability) = generateRoll(seed);
+        } else {
+            std::tie(seed, ability) = generateRollWithDrink(seed, drink);
+        }
+
+        if (ability != expectedAbility) {
+            validity = false;
+        }
+    }
+
+    return std::make_pair(validity, seed);
+}
+
 Ability SeedHelper::getBrandedAbility(uint32_t seed) const {
     assert(!brandName.empty());
     assert(totalWeight > 0);
@@ -117,6 +137,7 @@ Ability SeedHelper::getBrandedAbilityWithDrink(uint32_t seed, const Ability drin
 
     const auto drinkIndex = AbilityHelper::getIndex(drink);
     const auto& [currentDrinkTotalWeight, currentDrinkWeightsMap] = drinkRollToAbilityMap[drinkIndex];
+    assert(currentDrinkTotalWeight > 0);  // Assert that `cacheDrinkRollToAbilityMap` has been called for the current drink.
 
     const auto roll = seed % currentDrinkTotalWeight;
     return currentDrinkWeightsMap[roll];
