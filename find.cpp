@@ -13,12 +13,12 @@ int main(int argc, char* argv[]) {
     }
 
     const auto filename = argv[1];
-    bool dryRun = false;
+    bool overwriteFile = false;
 
     for (int i = 2; i < argc; i += 1) {
         const std::string_view argument{argv[i]};
-        if ((argument == "--dry-run") || (argument == "-n")) {
-            dryRun = true;
+        if ((argument == "--overwrite") || (argument == "-o")) {
+            overwriteFile = true;
         } else {
             std::string exceptionMessage{"Unrecognized argument: "};
             exceptionMessage += argument;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
         }
     } else {
         // Save the initial seed.
-        if (!dryRun) {
+        if (overwriteFile) {
             yamlFile.setInitialSeed(seed);
             std::cout << "Initial seed saved to YAML file: " << filename << std::endl;
         }
