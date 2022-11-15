@@ -167,6 +167,26 @@ std::pair<uint32_t, Ability> SeedHelper::generateRollWithDrink(uint32_t seed, co
     return std::make_pair(seed, ability);
 }
 
+std::vector<Ability> SeedHelper::generateRolls(uint32_t seed, const size_t length) const {
+    std::vector<Ability> returnValue{length, Ability::unknown};
+    for (size_t i = 0; i < length; i += 1) {
+        std::tie(seed, returnValue[i]) = generateRoll(seed);
+    }
+
+    return returnValue;
+}
+
+std::vector<Ability> SeedHelper::generateRollsWithDrink(uint32_t seed, Ability drink, size_t length) {
+    cacheDrinkRollToAbilityMap(drink);
+
+    std::vector<Ability> returnValue{length, Ability::unknown};
+    for (size_t i = 0; i < length; i += 1) {
+        std::tie(seed, returnValue[i]) = generateRollWithDrink(seed, drink);
+    }
+
+    return returnValue;
+}
+
 std::vector<uint32_t> SeedHelper::findSeedWorker(const RollSequence &previousRolls, const uint32_t seedStart, const uint32_t seedStop) const {
     assert(seedStart <= seedStop);
 
@@ -241,5 +261,3 @@ std::vector<uint32_t> SeedHelper::findSeed(const RollSequence &previousRolls, co
         return returnValue;
     }
 }
-
-

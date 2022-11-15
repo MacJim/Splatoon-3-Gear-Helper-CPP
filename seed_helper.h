@@ -85,6 +85,21 @@ public:
 
     [[nodiscard]] std::pair<uint32_t, Ability> generateRollWithDrink(uint32_t seed, Ability drink) const;
 
+public:
+    /**
+     * Generate `length` rolls at once.
+     *
+     * Used for prediction.
+     */
+    std::vector<Ability> generateRolls(uint32_t seed, size_t length = 15) const;
+
+    /**
+     * Generate `length` rolls with `drink` applied.
+     *
+     * Used for prediction.
+     */
+    std::vector<Ability> generateRollsWithDrink(uint32_t seed, Ability drink, size_t length = 15);
+
 #pragma mark Find seed
 private:
     /// Find valid seeds in the range [seedStart, seedStop].

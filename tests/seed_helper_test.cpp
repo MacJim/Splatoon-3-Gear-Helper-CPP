@@ -179,7 +179,7 @@ TEST(SeedHelperTest, GetBrandedAbilityBiasedBrands) {
 }
 
 
-#pragma mark generateRoll
+#pragma mark generateRoll and generateRolls
 TEST(SeedHelperTest, GenerateRollNeutralBrands) {
     constexpr uint32_t initialSeed = 0x81207561;
     constexpr std::array<std::pair<uint32_t, Ability>, 7> expectedResults = {
@@ -192,6 +192,7 @@ TEST(SeedHelperTest, GenerateRollNeutralBrands) {
         std::make_pair(0x19adf24a, Ability::runSpeedUp),
     };
 
+    // generateRoll
     for (auto& brandName: neutralBrands) {
         auto seedHelper = SeedHelper(brandName);
 
@@ -203,9 +204,21 @@ TEST(SeedHelperTest, GenerateRollNeutralBrands) {
             EXPECT_EQ(result.second, expectedAbility) << "Test case: (" << brandName << ", 0x" << std::hex << initialSeed << ")";
         }
     }
+
+    // generateRolls
+    for (auto& brandName: neutralBrands) {
+        auto seedHelper = SeedHelper(brandName);
+
+        const auto results = seedHelper.generateRolls(initialSeed, expectedResults.size());
+        EXPECT_EQ(results.size(), expectedResults.size());
+        for (size_t i = 0; i < results.size(); i += 1) {
+            EXPECT_EQ(results[i], expectedResults[i].second) << "Index: " << i;
+        }
+    }
 }
 
 
+/// `generateRoll` only.
 TEST(SeedHelperTest, GenerateRollBiasedBrands) {
     /**
      * {brand name: (seed, expected next seed, expected result)}
@@ -235,7 +248,35 @@ TEST(SeedHelperTest, GenerateRollBiasedBrands) {
 }
 
 
-#pragma mark generateRollWithDrink
+/// `generateRolls` only.
+TEST(SeedHelperTest, GenerateRollsBiasedBrands) {
+    constexpr uint32_t initialSeed = 0x23147098;
+    constexpr std::string_view brandName = "Splash Mob";
+    const std::vector<Ability> testCases {
+        Ability::specialPowerUp,
+        Ability::inkSaverMain,
+        Ability::specialSaver,
+        Ability::runSpeedUp,
+        Ability::quickRespawn,
+        Ability::specialChargeUp,
+        Ability::specialPowerUp,
+        Ability::inkResistanceUp,
+        Ability::quickSuperJump,
+        Ability::inkSaverMain,
+        Ability::runSpeedUp,
+        Ability::specialPowerUp,
+        Ability::swimSpeedUp,
+        Ability::swimSpeedUp,
+        Ability::inkSaverMain,
+    };
+
+    SeedHelper seedHelper{brandName};
+    const auto results = seedHelper.generateRolls(initialSeed, testCases.size());
+    EXPECT_EQ(results, testCases);
+}
+
+
+#pragma mark generateRollWithDrink and generateRollsWithDrink
 TEST(SeedHelperTest, GenerateRollWithDrinkNeutralBrands) {
     constexpr uint32_t initialSeed = 0x79239fed;
     constexpr auto drink = Ability::runSpeedUp;
@@ -253,6 +294,7 @@ TEST(SeedHelperTest, GenerateRollWithDrinkNeutralBrands) {
         std::make_pair(0xb41a6d22, Ability::specialPowerUp),
     };
 
+    // generateRollWithDrink
     for (auto& brandName: neutralBrands) {
         auto seedHelper = SeedHelper(brandName);
         seedHelper.cacheAllDrinkRollToAbilityMaps();
@@ -263,6 +305,17 @@ TEST(SeedHelperTest, GenerateRollWithDrinkNeutralBrands) {
             seed = result.first;
             EXPECT_EQ(seed, expectedSeed) << "Test case: (" << brandName << ", 0x" << std::hex << initialSeed << ")";
             EXPECT_EQ(result.second, expectedAbility) << "Test case: (" << brandName << ", 0x" << std::hex << initialSeed << ")";
+        }
+    }
+
+    // generateRollsWithDrink
+    for (auto& brandName: neutralBrands) {
+        auto seedHelper = SeedHelper(brandName);
+
+        const auto results = seedHelper.generateRollsWithDrink(initialSeed, drink, expectedResults.size());
+        EXPECT_EQ(results.size(), expectedResults.size());
+        for (size_t i = 0; i < results.size(); i += 1) {
+            EXPECT_EQ(results[i], expectedResults[i].second) << "Index: " << i;
         }
     }
 }
@@ -310,6 +363,7 @@ TEST(SeedHelperTest, GenerateRollWithDrinkBiasedBrands) {
         }),
     };
 
+    // generateRollWithDrink
     for (const auto& [brandName, initialSeed, drink, brandTestCases]: testCases) {
         auto seedHelper = SeedHelper(brandName);
         seedHelper.cacheDrinkRollToAbilityMap(drink);
@@ -320,6 +374,17 @@ TEST(SeedHelperTest, GenerateRollWithDrinkBiasedBrands) {
             seed = result.first;
             EXPECT_EQ(result.first, expectedNextSeed) << "Test case: (" << brandName << ", 0x" << std::hex << seed << ", 0x" << expectedNextSeed << ")";
             EXPECT_EQ(result.second, expectedAbility) << "Test case: (" << brandName << ", 0x" << std::hex << seed << ", 0x" << expectedNextSeed << ")";
+        }
+    }
+
+    // generateRollsWithDrink
+    for (const auto& [brandName, initialSeed, drink, brandTestCases]: testCases) {
+        auto seedHelper = SeedHelper(brandName);
+
+        const auto results = seedHelper.generateRollsWithDrink(initialSeed, drink, brandTestCases.size());
+        EXPECT_EQ(results.size(), brandTestCases.size());
+        for (size_t i = 0; i < results.size(); i += 1) {
+            EXPECT_EQ(results[i], brandTestCases[i].second) << "Index: " << i;
         }
     }
 }
